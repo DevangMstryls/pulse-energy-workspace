@@ -1,0 +1,16 @@
+# Manual exclusions — edit this file; preserved when update-workspace-gitignore.sh runs.
+.DS_Store
+*.rdb
+android-payments-sdk-master
+data/gke/downloaded-logs-20260417-181753.json
+data/reports
+pulse_data
+pulse-backoffice-console
+remotion-playground
+infra
+server-logs
+ubc-beckn-onix
+ubc-demo
+ev-bootcamp-kit-v1.zip
+.playwright-mcp
+FleetApp

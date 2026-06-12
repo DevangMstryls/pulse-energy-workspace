@@ -1,0 +1,38 @@
+---
+description: Use numbered lists instead of bullet lists in responses
+alwaysApply: true
+---
+
+# Response Formatting: Numbered Lists
+
+Always return numbered lists instead of bullet lists in responses to the user.
+
+- Use `1.`, `2.`, `3.` markers for any list of items in chat output.
+- Do NOT use `-`, `*`, or `+` bullet markers in chat output.
+- Applies to all enumerations: steps, options, findings, summaries, sub-items, etc.
+- For nested items, use indented numbering (e.g., `1.`, then nested `1.1.` or indented `1.`).
+
+## Scope
+
+This rule governs how the assistant formats lists in **chat responses to the user**. It does NOT change:
+
+1. Existing bullet-list content inside source files, markdown docs, READMEs, or rule files (do not rewrite those unless explicitly asked).
+2. Code samples, JSON, YAML, or other structured data where bullets are syntactic.
+
+## Examples
+
+Bad (bullet list in response):
+
+```
+- Run the build
+- Run the tests
+- Deploy
+```
+
+Good (numbered list in response):
+
+```
+1. Run the build
+2. Run the tests
+3. Deploy
+```

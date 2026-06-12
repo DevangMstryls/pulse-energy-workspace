@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"name": "pulse-energy-docs",
+			"path": "pulse-energy-docs"
+		},
+		{
+			"name": "pulse-ci-workflows",
+			"path": "pulse-ci-workflows"
+		},
+		{
+			"name": "pulse-infra-gitops",
+			"path": "pulse-infra-gitops"
+		},
+		{
+			"name": "pulse-iaac",
+			"path": "pulse-iaac"
+		}
+	]
+}

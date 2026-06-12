@@ -1,0 +1,39 @@
+---
+description: Report command execution results to the user as a structured table
+alwaysApply: true
+---
+
+# Command Output Reporting
+
+Whenever you run a command (shell, build, test, lint, migration, deploy, curl, prisma, npm, git, docker, etc.), report the result back to the user as a markdown table with these exact columns:
+
+| # | Command | Expected Result | Actual Result | Status |
+| - | ------- | --------------- | ------------- | ------ |
+
+## Column Rules
+
+1. `#` — sequential row number, preserving the order in which commands were executed.
+2. `Command` — the exact command string that was executed, wrapped in backticks. Do not truncate; if very long, keep the full command on one line.
+3. `Expected Result` — a short description of what the command was expected to produce or achieve (e.g., "exit 0, build artifacts in `dist/`", "all unit tests pass", "200 OK with user JSON", "schema applied, no drift").
+4. `Actual Result` — a concise summary of what actually happened: exit code, key stdout/stderr lines, error messages, counts (e.g., "exit 0, 142 tests passed in 18s", "exit 1: `TypeError: Cannot read properties of undefined`", "200 OK, 12 records returned").
+5. `Status` — exactly one of: `✅ Pass`, `❌ Fail`, or `⚠️ Partial` based on whether the actual result matched the expected result.
+
+## General Rules
+
+1. One row per command executed. If multiple commands were run in the same turn, include one row per command in the same table.
+2. If a command produced large or interesting output, include the table first, then optionally a fenced code block beneath it with the relevant excerpt — never paste raw output in place of the table.
+3. This applies to every agent turn that runs at least one command. If no commands were run in a turn, the table is not required.
+4. The table itself uses markdown table syntax — the numbered-list rule does not override this; tabular data must remain in table form.
+
+## Example
+
+User asks: "Build and test the project."
+
+```
+| # | Command         | Expected Result                   | Actual Result                              | Status   |
+| - | --------------- | --------------------------------- | ------------------------------------------ | -------- |
+| 1 | `npm run build` | exit 0, output in `dist/`         | exit 0, `dist/` written in 12s             | ✅ Pass  |
+| 2 | `npm test`      | all tests pass                    | exit 1, 3 of 142 tests failed in `auth.spec.ts` | ❌ Fail  |
+```
+
+Followed (optionally) by an excerpt of the failing test output in a fenced code block.

@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(pnpm *)",
+      "Bash(node *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git fetch*)",
+      "Bash(git ls-remote*)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(gh run *)",
+      "Bash(npm install*)",
+      "Bash(npm audit*)",
+      "Bash(npm test*)",
+      "Bash(npx tsc*)",
+      "Bash(ls*)",
+      "Bash(find*)",
+      "Bash(grep*)",
+      "Bash(wc*)",
+      "Bash(echo*)",
+      "Bash(mkdir*)",
+      "Bash(cd*)",
+      "Read",
+      "Write",
+      "Edit",
+      "Glob",
+      "Grep"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(*--force*)",
+      "Bash(*--no-verify*)",
+      "Read(**.env)",
+      "Read(**.dev.env)",
+      "Read(**.stg.env)",
+      "Read(**.prod.env)",
+      "Read(**/secrets/**)",
+      "Read(**/.env.local)"
+    ]
+  }
+}

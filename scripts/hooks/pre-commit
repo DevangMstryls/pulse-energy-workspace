@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Optional hook: refresh .gitignore before each commit so newly cloned repos
+# are excluded automatically.
+
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+"${ROOT}/scripts/update-workspace-gitignore.sh"
+
+if ! git diff --quiet -- .gitignore; then
+    git add .gitignore
+    echo "pre-commit: staged updated .gitignore"
+fi

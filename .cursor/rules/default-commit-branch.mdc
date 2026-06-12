@@ -1,0 +1,36 @@
+---
+description: Default to committing on the develop branch unless overridden
+alwaysApply: true
+---
+
+# Default Commit Branch
+
+Always commit changes on the `develop` branch unless one of the following is true:
+
+1. The user has explicitly asked to commit on a different branch (e.g., a feature branch or `main`).
+2. The repo's default active branch is something other than `develop` (e.g., a repo where `main`, `master`, or `staging` is the active integration branch). In that case, use the repo's default active branch.
+
+## Procedure
+
+Before committing, the agent MUST:
+
+1. Run `git status` and `git rev-parse --abbrev-ref HEAD` to confirm the current branch.
+2. If not on `develop` (or the repo's overriding default), check whether `develop` exists locally with `git rev-parse --verify develop`.
+3. If `develop` exists locally, switch to it with `git checkout develop` (after stashing or moving uncommitted changes appropriately).
+4. If `develop` does not exist but exists on `origin`, run `git fetch origin develop` and `git checkout -b develop origin/develop`.
+5. If the repo has no `develop` branch at all, treat the repo's existing default branch as the override and proceed there. Note this in the Work Summary `Additional Notes` column.
+
+## Safety Rules
+
+1. NEVER commit on `main`, `master`, or `production` unless the user explicitly asks for it.
+2. If switching branches risks losing uncommitted work, ask the user before switching.
+3. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
+4. Always record the actual branch used in the Work Summary table's `Branch` column.
+
+## Per-Repo Overrides
+
+If a specific repo in this monorepo workspace uses a different integration branch as its default, that takes precedence over `develop`. Detect this by:
+
+1. Checking `git symbolic-ref refs/remotes/origin/HEAD` for the remote's default branch.
+2. Checking the repo's `CLAUDE.md` / `AGENTS.md` for any documented branch convention.
+3. Asking the user when in doubt.

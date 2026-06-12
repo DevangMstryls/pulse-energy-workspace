@@ -1,0 +1,45 @@
+---
+description: Provide a structured end-of-work summary table after completing any task
+alwaysApply: true
+---
+
+# Work Completion Summary
+
+At the end of every task (after all code changes, commands, and validations are done), the agent MUST provide a final "Work Summary" report to the user as a markdown table with at least the following columns:
+
+| # | Repo | Branch | Status | PRs | Files Changed | Additional Notes |
+| - | ---- | ------ | ------ | --- | ------------- | ---------------- |
+
+## Column Rules
+
+1. `#` — sequential row number. One row per repository touched in the task.
+2. `Repo` — the repository name (e.g., `pulse-central`, `central-console`, `pulse-ocpp-engine`). Use the directory name under `/Users/devangmstryls/desk/projects/pulse/` if the repo name is not otherwise obvious.
+3. `Branch` — the branch where changes were made (e.g., `develop`, `feature/xyz`). If a new branch was created, mention `<branch-name> (new)`.
+4. `Status` — one of: `✅ Done`, `⏳ In Progress`, `❌ Blocked`, `⚠️ Partial`, `🚫 Skipped`. Choose the one that best reflects the state of work in that repo.
+5. `PRs` — link or PR number(s) if a PR was created or updated (e.g., `#1234`, full URL). Use `—` if no PR was opened.
+6. `Files Changed` — count of files modified, with optional brief grouping (e.g., `4 files (services, schema)`). Use `—` if no files were changed.
+7. `Additional Notes` — anything important: pending TODOs, follow-ups, manual steps required, deploys needed, migrations to run, env vars to update, blockers, related tickets, etc.
+
+## General Rules
+
+1. The Work Summary table is mandatory at the end of any task that produced a meaningful change (code edits, commits, PRs, infra changes, schema updates, deploys, etc.). It is not required for purely informational/Q&A turns where nothing was modified.
+2. Show the Work Summary table even if no commits were made — in that case, set `Branch` to the working branch and explain in `Additional Notes` (e.g., "uncommitted local changes — awaiting user approval to commit").
+3. The Work Summary is separate from the per-command "Command Output Reporting" table. Both can appear in the same response: command results table first (during/after execution), Work Summary table at the very end.
+4. Below the table, include a short numbered list of next steps the user should take (deploy, review PR, run migration, update env, etc.) when applicable.
+5. Tabular data stays in markdown table form — the numbered-list rule does not override this.
+
+## Example
+
+```
+| # | Repo            | Branch    | Status   | PRs    | Files Changed                | Additional Notes                                          |
+| - | --------------- | --------- | -------- | ------ | ---------------------------- | --------------------------------------------------------- |
+| 1 | pulse-central   | develop   | ✅ Done  | #4231  | 6 files (services, schema)   | Migration `20260610_add_x` must run on staging before prod |
+| 2 | central-console | develop   | ✅ Done  | #1187  | 3 files (views, store)       | Feature flag `enable_x` must be turned on after deploy    |
+| 3 | pulse-ai        | develop   | 🚫 Skipped | —    | —                            | No changes needed for this task                           |
+```
+
+Followed by next steps:
+
+1. Run migration `20260610_add_x` on staging.
+2. Merge `#4231`, then `#1187`.
+3. Enable feature flag `enable_x` in central-console env.
