@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 "${ROOT}/scripts/update-workspace-gitignore.sh"
 
-for path in .gitignore .vscode/settings.json pulse.code-workspace; do
+for path in .gitignore .vscode/settings.json .vscode/.generated-repo-paths.json pulse.code-workspace; do
     if ! git diff --quiet -- "$path" 2>/dev/null; then
         git add "$path"
         echo "pre-commit: staged updated ${path}"
