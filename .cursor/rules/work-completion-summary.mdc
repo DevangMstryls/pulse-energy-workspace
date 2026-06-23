@@ -27,6 +27,7 @@ At the end of every task (after all code changes, commands, and validations are 
 3. The Work Summary is separate from the per-command "Command Output Reporting" table. Both can appear in the same response: command results table first (during/after execution), Work Summary table at the very end.
 4. Below the table, include a short numbered list of next steps the user should take (deploy, review PR, run migration, update env, etc.) when applicable.
 5. Tabular data stays in markdown table form — the numbered-list rule does not override this.
+6. Immediately AFTER the Work Summary table (and before any "next steps" list), the agent MUST call `headroom_stats` and render a `### Headroom stats` block with the returned metrics. See the `headroom-context-compression` rule for the exact format. If `headroom_stats` fails or is unavailable, note that in the Work Summary `Additional Notes` column instead of skipping silently.
 
 ## Example
 

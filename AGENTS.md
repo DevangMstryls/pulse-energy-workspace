@@ -230,3 +230,54 @@ Before committing, the agent MUST:
 4. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
 5. Record the actual branch used in the Work Summary `Branch` column.
 
+## Headroom (Context Compression)
+
+Three Headroom MCP tools are available for on-demand context compression. **Note: these operate in MCP-only mode** — they compress content you explicitly pass in, and track only those savings. The Headroom proxy (`http://127.0.0.1:8787`) that would auto-compress all traffic is not currently integrated with opencode, so it is not active.
+
+1. `headroom_compress` — call this on any large tool output (search results, file reads larger than ~500 tokens, command logs, RAG chunks) BEFORE reasoning over it. Typical savings: 60-95% of tokens. Returns a `hash` that can be used to retrieve the original later.
+2. `headroom_retrieve` — call with a `hash` returned by a prior compression to get the full original content back. Accepts an optional `query` to filter results.
+3. `headroom_stats` — call at the end of a session, or when the user asks for a token/cost summary.
+
+### When to compress
+
+1. Search results with many matches.
+2. File reads of large files — try `offset`/`limit` first; compress if still large.
+3. Command output longer than ~100 lines.
+4. RAG chunks or multiple file reads combined into a single reasoning step.
+
+### When NOT to compress
+
+1. Content the agent is about to edit — read/compress AFTER the edit, not before (editing requires exact original text).
+2. Short outputs under ~500 tokens (overhead not worth it).
+3. Structured data needed verbatim for downstream tool calls (file paths, hashes, generated SQL, etc.).
+
+Each Headroom tool call counts as a command for reporting purposes and MUST appear as a row in the per-turn Command Output Reporting table, with a short summary of bytes/tokens saved or the hash returned.
+
+### Headroom stats at end of every task
+
+At the END of every task that produced a meaningful change (i.e., every turn that also requires a Work Completion Summary), the agent MUST:
+
+1. Call `headroom_stats` as the last tool call of the turn.
+2. Check proxy status: run `curl -s --max-time 2 http://127.0.0.1:8787/health` — note whether it is running or not.
+3. Render a `### Headroom stats` block immediately AFTER the Work Summary table and BEFORE any "next steps" list, in this format:
+
+```
+### Headroom stats
+
+| Metric | Value |
+| ------ | ----- |
+| Compressions this session  | … |
+| Tokens in (original)       | … |
+| Tokens in (compressed)     | … |
+| Tokens saved               | … (NN%) |
+| MCP-only cost saved (est.) | $… |
+| Proxy status               | ⚠️ Not running — only explicit compressions tracked |
+```
+
+Replace the proxy status line with `✅ Running — full session savings tracked` if the proxy health check succeeds.
+
+**Why the cost number is small:** `estimated_cost_saved_usd` uses a hardcoded $3/1M token rate and only counts tokens passed explicitly to `headroom_compress`. It does NOT reflect total conversation token spend. Full-session savings require the proxy to be running and traffic routed through it — which opencode does not currently support.
+
+4. If `headroom_stats` is unavailable or errors, note that in the Work Summary `Additional Notes` column — never fabricate numbers.
+5. For purely informational/Q&A turns where no Work Summary is produced, the stats block is optional and should be included only if the user asks.
+

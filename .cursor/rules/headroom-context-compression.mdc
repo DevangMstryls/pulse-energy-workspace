@@ -1,0 +1,54 @@
+---
+description: Use the Headroom proxy and MCP tools to compress large tool outputs
+alwaysApply: true
+---
+
+# Headroom (Context Compression)
+
+A Headroom proxy is running at `http://127.0.0.1:8787` and transparently compresses all model traffic. In addition, three MCP tools are exposed for on-demand use whenever the agent is about to reason over a large blob of text.
+
+## Available Tools
+
+1. `headroom_compress` — call this on any large tool output (search results, file reads `> ~500` tokens, command logs, RAG chunks) BEFORE reasoning over it. Typical savings: 60-95% of tokens. Returns a `hash` that can be used to retrieve the original later.
+2. `headroom_retrieve` — call with a `hash` returned by a prior compression to get the full original content back. Accepts an optional `query` to filter results down to what's relevant.
+3. `headroom_stats` — call at the end of a session, or when the user asks for a token/cost summary.
+
+## When to Compress
+
+1. Search results with many matches (e.g., wide `Grep`/`ripgrep` results).
+2. File reads of large files — first try `offset`/`limit` on `Read`; if the necessary slice is still large, compress.
+3. Command output longer than ~100 lines (build logs, test output, prisma migrate output, kubectl describe, etc.).
+4. RAG chunks, or multiple file reads combined into a single reasoning step.
+5. Any tool output (MCP or otherwise) that would otherwise consume a significant chunk of the context window.
+
+## When NOT to Compress
+
+1. Content the agent is about to edit — read/compress only AFTER the edit, not before. Editing requires the exact original text.
+2. Short outputs under ~500 tokens — compression overhead isn't worth it.
+3. Structured data the agent needs verbatim for downstream tool calls (e.g., a specific file path, a hash, a generated SQL query).
+
+## Workflow
+
+1. Run the tool that produces the large output (e.g., `Grep`, `Read`, `Shell`).
+2. If the result is large per the criteria above, call `headroom_compress` on it immediately.
+3. Reason over the compressed summary. If a specific section is needed verbatim, call `headroom_retrieve` with the `hash` (and an optional `query`) to pull back just what's required.
+4. At the end of a session — or whenever the user asks how much context/tokens/cost was used — call `headroom_stats` and surface the result.
+
+## Reporting
+
+1. Headroom compress/retrieve/stats calls are tool calls, so each one MUST appear as a row in the per-turn Command Output Reporting table (see the `command-output-reporting` rule), with a short summary of bytes/tokens saved or the hash returned in the `Actual Result` column.
+2. At the END of every task that produced a meaningful change (i.e., any turn that also requires a Work Completion Summary), the agent MUST call `headroom_stats` and include a brief stats block immediately AFTER the Work Summary table. The block should include at minimum: total tokens in/out, tokens saved by compression, percent saved, and estimated cost saved (whatever `headroom_stats` returns). Format:
+
+```
+### Headroom stats
+
+| Metric | Value |
+| ------ | ----- |
+| Tokens in (original) | … |
+| Tokens in (compressed) | … |
+| Tokens saved | … (NN%) |
+| Estimated cost saved | $… |
+```
+
+3. If `headroom_stats` is unavailable or fails for any reason, note that in the Work Summary `Additional Notes` column instead of fabricating numbers.
+4. For purely informational/Q&A turns where no Work Summary is produced, the stats block is optional — include it only if the user explicitly asks.
