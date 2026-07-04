@@ -160,7 +160,20 @@ See `pulse-ocpp-engine/CLAUDE.md` for detailed architecture. Key points:
 
 Always create and maintain properly structured documentations in any repo in a `docs` folder.
 
-Also ALWAYS update the docs in [pulse-energy-docs](pulse-energy-docs) repo whenever any changes are made
+Also ALWAYS update the docs in [pulse-energy-docs](pulse-energy-docs) repo whenever any changes are made.
+
+### Mandatory `pulse-energy-docs` Mirror
+
+Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g., `pulse-central`, `central-console`, `pulse-ocpp-engine`, `InstaCharge`, `pulse-web`, `pulse-energy-lite`, `pulse-streamer`, `pulse-dataverse`, `pulse-ai`, `pulse-central-alpha`, or the workspace root) MUST document every meaningful change in `~/desk/projects/pulse/pulse-energy-docs`.
+
+1. Pick the appropriate sub-folder under `pulse-energy-docs/docs/`: `features/`, `guides/`, `prds/`, `plans/`, `RCAs/`, `audits/`, `observability/`, or `misc/` (default when unsure).
+2. Use kebab-case filenames with a date prefix, e.g., `docs/features/2026-06-25-fleet-bulk-import.md`.
+3. Each doc must include: Title, Date, Originating repo(s), Branch(es), PRs, Summary (2-5 sentences), Files changed, Operational notes (migrations/env/feature flags/deploys/rollback), and Links (tickets, dashboards, Sentry issues).
+4. A single task spanning multiple pulse repos produces ONE consolidated doc that links to each PR — not one doc per repo.
+5. Add `pulse-energy-docs` as its OWN row in the Work Completion Summary table (with its own branch, files changed, PRs).
+6. The `pulse-energy-docs` default branch is `master` — this overrides the workspace-wide `develop` default per the per-repo override clause in `## Default Commit Branch`.
+7. NEVER skip the docs update silently. If intentionally skipping (e.g., trivial typo fix), state the reason in the Work Summary `Additional Notes`.
+8. Do NOT put secrets, credentials, tokens, or customer PII in `pulse-energy-docs`. The `docs/creds/` folder is for credential-handling process docs, not the credentials themselves.
 
 ### JSDoc comments
 

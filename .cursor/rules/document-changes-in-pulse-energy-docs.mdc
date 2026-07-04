@@ -1,0 +1,66 @@
+---
+description: Mirror every change made under ~/desk/projects/pulse into the pulse-energy-docs repo
+alwaysApply: true
+---
+
+# Document Every Change in `pulse-energy-docs`
+
+Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g., `pulse-central`, `central-console`, `pulse-ocpp-engine`, `InstaCharge`, `pulse-web`, `pulse-energy-lite`, `pulse-streamer`, `pulse-dataverse`, `pulse-ai`, `pulse-central-alpha`, or the workspace root itself) MUST document the change in the `pulse-energy-docs` repo at `~/desk/projects/pulse/pulse-energy-docs`.
+
+This is mandatory for every meaningful change (code edits, commits, PRs, schema/migration changes, infra updates, deploys, env/feature-flag changes, rule/skill/hook additions, etc.). Purely informational/Q&A turns where nothing was modified do NOT need a docs update.
+
+## Where to Document
+
+Pick the most-appropriate folder under `pulse-energy-docs/docs/`. If unsure, default to `docs/misc/`:
+
+1. `docs/features/` — new product features, capability additions, feature-flag rollouts.
+2. `docs/guides/` — how-tos, runbooks, developer onboarding, operator guides.
+3. `docs/prds/` — PRDs and product specs.
+4. `docs/plans/` — implementation plans, design docs, multi-step rollouts.
+5. `docs/RCAs/` — root-cause analyses for incidents/regressions.
+6. `docs/audits/` — security/compliance/code audits.
+7. `docs/observability/` — dashboards, alerts, log queries, SLO changes.
+8. `docs/misc/` — everything else (rule changes, tooling tweaks, workspace config, scripts).
+
+Use kebab-case filenames with a date prefix where it adds clarity, e.g.:
+`docs/features/2026-06-25-fleet-bulk-import.md`,
+`docs/RCAs/2026-06-19-ocpp-engine-restart-loop.md`,
+`docs/misc/2026-06-25-cursor-rules-numbered-lists.md`.
+
+## What Each Doc Must Include
+
+At minimum, each new/updated doc file should have:
+
+1. `Title` — short, descriptive.
+2. `Date` — ISO date of the change.
+3. `Originating repo(s)` — e.g., `pulse-central`, `central-console`, `pulse-energy-docs`, or `pulse (workspace root)`.
+4. `Branch(es)` — branch the change was made on in each repo.
+5. `PRs` — list of PR numbers/URLs (use `—` if none yet).
+6. `Summary` — 2-5 sentences on what changed and why.
+7. `Files changed` — bullet/numbered list of notable files (group where helpful).
+8. `Operational notes` — migrations to run, env vars to set, feature flags to toggle, deploys required, rollback plan.
+9. `Links` — related tickets, Slack threads, Grafana dashboards, Sentry issues, related PRDs/RCAs.
+
+For very small/cosmetic changes, a one-paragraph entry appended to an existing rollup doc (e.g., `docs/misc/2026-06-changelog.md`) is acceptable — but the entry still needs Date, Repo, PRs, and a one-line summary.
+
+## Procedure
+
+When making changes in any pulse repo, the agent MUST:
+
+1. Make the primary changes in the target repo as usual.
+2. Create or update the corresponding doc in `~/desk/projects/pulse/pulse-energy-docs/docs/<folder>/...`.
+3. Add `pulse-energy-docs` as its own row in the Work Completion Summary table, with its own `Branch`, `Files Changed`, and `PRs` columns.
+4. Commit the docs change on the `pulse-energy-docs` default branch (`master` — this overrides the workspace-wide `develop` default; see the `default-commit-branch` rule's per-repo override clause).
+5. If the user did not give explicit consent to commit, leave the docs file as an uncommitted local change and call this out in `Additional Notes`.
+
+## Cross-Repo Coordination
+
+1. A single task touching multiple pulse repos should produce ONE consolidated doc (not one per repo), linking out to each PR.
+2. If a doc already exists for the feature/area, UPDATE it (append a dated section) instead of creating a new file.
+3. NEVER skip the docs update silently. If skipping intentionally (e.g., trivial typo fix), state the reason explicitly in the Work Summary `Additional Notes`.
+
+## Safety
+
+1. Do not put secrets, credentials, tokens, or customer PII in `pulse-energy-docs`. The `docs/creds/` folder is for credential-handling docs (process, rotation), NOT the credentials themselves.
+2. Respect `pulse-energy-docs/.gitignore` and existing folder conventions.
+3. Default commit branch override for this repo: `master` (verified via `git symbolic-ref refs/remotes/origin/HEAD`).
