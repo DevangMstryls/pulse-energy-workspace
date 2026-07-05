@@ -156,6 +156,12 @@ See `pulse-ocpp-engine/CLAUDE.md` for detailed architecture. Key points:
 - **Payment integrations**: Razorpay and Paytm across backend and frontend
 - **Maps**: Google Maps API used in both web and mobile apps
 
+## Deployment & GitOps (ArgoCD)
+
+- Pulse Energy deployments run on **two independent ArgoCD control planes**: staging (`stg-argocd.pulseenergy.io`, EKS cluster `pulse-energy-staging-cluster`) and production (`argocd.pulseenergy.io`, EKS cluster `pulse-prod-eks`). They are not the same server managing two environments — always confirm which one is being targeted.
+- GitOps manifests live in `pulse-ci-workflows/argocd/` (ApplicationSet generators for `stg-*`/`prod-*` apps) and `pulse-infra-gitops/argocd/` (standalone `Application` manifests not covered by the ApplicationSet, e.g. Airflow).
+- **Use the `pulse-argocd` skill** for anything involving ArgoCD — listing workloads/apps, checking sync or health status, syncing/rolling back a deployment, debugging a red/`OutOfSync`/`ComparisonError` app, or answering "what's deployed in staging/production". Load it via the skill tool (`pulse-argocd`) whenever these topics come up, even if the user doesn't say "ArgoCD" explicitly (e.g. "why is prod-pulse-proxy not updating").
+
 ## Documentation
 
 Always create and maintain properly structured documentations in any repo in a `docs` folder.
