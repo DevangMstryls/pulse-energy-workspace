@@ -42,7 +42,6 @@ beckn/beckn-transformer/
 bpp-client-server/
 bpp-network-server/
 central-console/
-claude-skills/
 columbus/
 cp-farm/
 cs-sim-manager/
@@ -82,6 +81,7 @@ pulse-ocpp-engine/
 pulse-ops-dashboard/
 pulse-pay/
 pulse-random-tools/
+pulse-skills/
 pulse-streamer/
 pulse-ubc-ocpi-adaptor/
 pulse-ubc-ocpi-adaptor-dashboard/

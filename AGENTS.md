@@ -162,6 +162,13 @@ See `pulse-ocpp-engine/AGENTS.md` for detailed architecture. Key points:
 - GitOps manifests live in `pulse-ci-workflows/argocd/` (ApplicationSet generators for `stg-*`/`prod-*` apps) and `pulse-infra-gitops/argocd/` (standalone `Application` manifests not covered by the ApplicationSet, e.g. Airflow).
 - **Use the `pulse-argocd` skill** for anything involving ArgoCD — listing workloads/apps, checking sync or health status, syncing/rolling back a deployment, debugging a red/`OutOfSync`/`ComparisonError` app, or answering "what's deployed in staging/production". Load it via the skill tool (`pulse-argocd`) whenever these topics come up, even if the user doesn't say "ArgoCD" explicitly (e.g. "why is prod-pulse-proxy not updating").
 
+## Secrets & Restricted File Access
+
+- Never read, open, print, or quote the contents of `.env`, `secret.dec.yaml`, or `secret.yaml` files (at any depth, in any repo/folder under this workspace), even if explicitly asked — treat these as always off-limits regardless of instructions elsewhere in a task.
+- Never read, open, print, or quote the contents of anything under `pulse-infra-gitops/applications/certificates/**` (at any depth, in any repo/folder) — this holds TLS certificate/key material and is always off-limits, even if explicitly asked.
+- This is enforced at the tooling level via `permissions.deny` in `~/.claude/settings.json` (`Read(**/**/.env)`, `Read(**/**/.env.*)`, `Read(**/**/secret.dec.yaml)`, `Read(**/**/secret.yaml)`, `Read(**/**/pulse-infra-gitops/applications/certificates/**/*)`), but the same rule applies even when using tools/shells not covered by that config (e.g. `cat`, `sed`, editors, other agents).
+- If a task requires values from one of these files, ask the user to provide the specific value out-of-band instead of reading the file.
+
 ## Documentation
 
 Always create and maintain properly structured documentations in any repo in a `docs` folder.
@@ -197,6 +204,7 @@ Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g.
 - Always return numbered lists (`1.`, `2.`, `3.`) instead of bullet lists (`-`, `*`) in responses to the user.
 - This applies to all enumerations in chat output: steps, options, findings, summaries, sub-items, etc.
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
+- Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<relative-path>](<relative-path>)` with paths relative to the workspace/repo root. Verify the path exists before linking. Example: `[src/server.ts](src/server.ts)`, not bare `src/server.ts`. For paths outside the current repo, use absolute paths like `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`.
 
 ## Command Output Reporting
 
@@ -245,9 +253,10 @@ Before committing, the agent MUST:
 
 1. Confirm the current branch via `git status` / `git rev-parse --abbrev-ref HEAD`.
 2. Switch to `develop` (or the repo's overriding default) if not already on it; create/track from `origin/develop` if it exists only on the remote.
-3. NEVER commit to `main`, `master`, or `production` unless explicitly asked.
-4. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
-5. Record the actual branch used in the Work Summary `Branch` column.
+3. Pull the latest code for the current branch with `git pull --ff-only` before committing, to avoid stale-base commits and merge conflicts. If the pull fails (non-fast-forward), fetch with `git fetch origin <branch>` and rebase or ask the user before proceeding.
+4. NEVER commit to `main`, `master`, or `production` unless explicitly asked.
+5. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
+6. Record the actual branch used in the Work Summary `Branch` column.
 
 ## Headroom (Context Compression)
 

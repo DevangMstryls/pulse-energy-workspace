@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../../.claude"
+		},
+		{
+			"path": "../../../.codex"
+		},
+		{
+			"path": "../../../.cursor"
+		},
+		{
+			"path": "../../../.fabriqa"
+		},
+		{
+			"path": "../../../.maestro"
+		},
+		{
+			"path": "../../../.mobiledev"
+		},
+		{
+			"path": "../../../.copilot"
+		}
+	],
+	"settings": {}
+}

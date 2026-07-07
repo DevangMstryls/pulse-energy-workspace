@@ -197,6 +197,7 @@ Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g.
 - Always return numbered lists (`1.`, `2.`, `3.`) instead of bullet lists (`-`, `*`) in responses to the user.
 - This applies to all enumerations in chat output: steps, options, findings, summaries, sub-items, etc.
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
+- Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<relative-path>](<relative-path>)` with paths relative to the workspace/repo root. Verify the path exists before linking. Example: `[src/server.ts](src/server.ts)`, not bare `src/server.ts`. For paths outside the current repo, use absolute paths like `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`.
 
 ## Command Output Reporting
 
@@ -245,9 +246,10 @@ Before committing, the agent MUST:
 
 1. Confirm the current branch via `git status` / `git rev-parse --abbrev-ref HEAD`.
 2. Switch to `develop` (or the repo's overriding default) if not already on it; create/track from `origin/develop` if it exists only on the remote.
-3. NEVER commit to `main`, `master`, or `production` unless explicitly asked.
-4. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
-5. Record the actual branch used in the Work Summary `Branch` column.
+3. Pull the latest code for the current branch with `git pull --ff-only` before committing, to avoid stale-base commits and merge conflicts. If the pull fails (non-fast-forward), fetch with `git fetch origin <branch>` and rebase or ask the user before proceeding.
+4. NEVER commit to `main`, `master`, or `production` unless explicitly asked.
+5. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
+6. Record the actual branch used in the Work Summary `Branch` column.
 
 ## Headroom (Context Compression)
 

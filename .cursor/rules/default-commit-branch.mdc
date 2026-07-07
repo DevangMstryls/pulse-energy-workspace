@@ -19,6 +19,7 @@ Before committing, the agent MUST:
 3. If `develop` exists locally, switch to it with `git checkout develop` (after stashing or moving uncommitted changes appropriately).
 4. If `develop` does not exist but exists on `origin`, run `git fetch origin develop` and `git checkout -b develop origin/develop`.
 5. If the repo has no `develop` branch at all, treat the repo's existing default branch as the override and proceed there. Note this in the Work Summary `Additional Notes` column.
+6. Pull the latest code for the current branch with `git pull --ff-only` before committing, to avoid stale-base commits and merge conflicts. If the pull fails (non-fast-forward), fetch with `git fetch origin <branch>` and rebase or ask the user before proceeding.
 
 ## Safety Rules
 
