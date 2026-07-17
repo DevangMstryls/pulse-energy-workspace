@@ -15,6 +15,9 @@
 		{
 			"name": "pulse-iaac",
 			"path": "pulse-iaac"
+		},
+		{
+			"path": "pulse-skills"
 		}
 	]
 }

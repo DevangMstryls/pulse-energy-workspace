@@ -61,6 +61,7 @@ proxy-server/
 pulse-ai/
 pulse-ai-ui/
 pulse-api/
+pulse-artifacts/
 pulse-central/
 pulse-central-alpha/
 pulse-central-new-rest/

@@ -188,6 +188,17 @@ Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g.
 7. NEVER skip the docs update silently. If intentionally skipping (e.g., trivial typo fix), state the reason in the Work Summary `Additional Notes`.
 8. Do NOT put secrets, credentials, tokens, or customer PII in `pulse-energy-docs`. The `docs/creds/` folder is for credential-handling process docs, not the credentials themselves.
 
+## Long-Term Memory (Basic Memory MCP)
+
+A `basic-memory` MCP server provides persistent, searchable, cross-session memory (facts about the user, decisions, gotchas) backed by git-tracked Markdown notes in `pulse-energy-docs/memory/` (project name: `pulse-memory`). Setup/replication guide: [pulse-energy-docs/docs/guides/2026-07-17-basic-memory-ai-setup.md](pulse-energy-docs/docs/guides/2026-07-17-basic-memory-ai-setup.md).
+
+1. If the `basic-memory` MCP tools are available in this session, use them proactively:
+   - Before starting non-trivial work, call `search_notes` / `build_context` / `recent_activity` to recall relevant prior context (user preferences, past decisions, repo-specific gotchas).
+   - After learning a durable fact about the user, a decision, or a recurring gotcha, write or edit a note with `write_note` / `edit_note` — don't wait to be asked, but don't log trivial/one-off details either.
+2. If the `basic-memory` MCP tools are NOT available (server not configured on this machine/session), tell the user once and point them at the setup guide above rather than silently skipping memory.
+3. Memory notes are plain Markdown (Entities with `## Observations` and `## Relations`) and live under version control — treat them like any other doc: no secrets, credentials, tokens, or customer PII.
+4. This memory store is a supplement to, not a replacement for, the `pulse-energy-docs` change-documentation mirror above — durable user/agent context goes in `memory/`, project change history goes in `docs/`.
+
 ### JSDoc comments
 
 - Add JSDoc comments for each and every type, interface and function that you create.
