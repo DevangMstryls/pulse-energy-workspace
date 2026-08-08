@@ -100,3 +100,5 @@ ubc-ocpi-adaptor/
 ubc-specs/DEG/
 ubc-specs/protocol-specifications-new/
 ubc/ubc-ev-sandbox-otel/
+cert/star_pulseenergy_io.csr
+cert/star_pulseenergy_io.key
