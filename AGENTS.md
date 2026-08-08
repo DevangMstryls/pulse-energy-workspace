@@ -269,3 +269,52 @@ Before committing, the agent MUST:
 5. NEVER force-push, rebase shared branches, or change git config without explicit instruction.
 6. Record the actual branch used in the Work Summary `Branch` column.
 
+## Battery Monitoring (Low Battery Alert)
+
+A `devbook-service-manager` MCP server exposes a `system_overview` tool that returns `battery.percent` and `battery.state`. Use it to alert the user when battery is low.
+
+- **Threshold**: 30%. Trigger whenever `battery.percent < 30`.
+- **Mid-session check**: At the start of every agent turn, call `system_overview` once. If `battery.percent < 30`, immediately print a visible alert block (see format below) at the top of the response, BEFORE doing anything else. Do not repeat the alert within the same turn.
+- **End-of-session check**: At the END of every task that produced a meaningful change (i.e., every turn that also requires a Work Completion Summary), call `system_overview` again. If `battery.percent < 30`, render the alert block immediately AFTER the Work Summary table and BEFORE any "next steps" list.
+- **Charging override**: If `battery.state` is `charging`, skip the alert — the machine is plugged in and not at risk. Still call `system_overview` so the percent is known, but do not print the alert block.
+- **Format**:
+
+```
+### ⚠️ Low Battery
+
+| Metric | Value |
+| ------ | ----- |
+| Battery percent | NN% |
+| Battery state   | discharging |
+```
+
+- If `system_overview` is unavailable or errors, silently skip — never block work on a tooling failure.
+- This rule applies only when the `devbook-service-manager` MCP server is available in the session.
+
+# AWS Guidance
+
+- Prefer the AWS MCP Server for AWS interactions — it provides sandboxed
+  execution, observability, and audit logging. If unavailable, use the
+  AWS CLI directly.
+- Before starting a task, check whether a relevant AWS skill is available.
+  Load the skill with `retrieve_skill` and prefer its guidance over
+  general knowledge.
+- When uncertain about specific AWS details (API parameters, permissions,
+  limits, error codes), verify against documentation rather than guessing.
+  State uncertainty explicitly if you cannot confirm.
+- When creating infrastructure, prefer infrastructure-as-code (AWS CDK or
+  CloudFormation) over direct CLI commands.
+- When working with infrastructure, follow AWS Well-Architected Framework
+  principles.
+- Do not use em dashes in AWS resource names or descriptions. Use
+  hyphens instead.
+
+## Secret Safety
+
+- MUST load the `aws-secrets-manager` skill first for any secret,
+  credential, API key, token, or password task. MUST NOT call
+  `secretsmanager get-secret-value` or `batch-get-secret-value`, and MUST
+  NOT hit the Secrets Manager Agent daemon directly. MUST use
+  `{{resolve:secretsmanager:secret-id:SecretString:json-key}}` with
+  `asm-exec` so the secret resolves at runtime without entering context.
+

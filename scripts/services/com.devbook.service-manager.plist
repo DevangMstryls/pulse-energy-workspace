@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  com.devbook.service-manager.plist
+
+  launchd user agent that runs the Devbook Service Manager MCP server on login.
+
+  Transport: stdio. Agents (opencode / Claude Desktop) launch their OWN instance
+  per session via the local stdio command in their MCP config — this plist exists
+  only to pre-warm `uv` deps and (optionally) expose an HTTP/SSE endpoint for
+  shared long-lived use.
+
+  By default this plist runs a no-op "warmup" so deps are cached. To switch to
+  a persistent HTTP/SSE server, change the ProgramArguments to run:
+      uv run server.py --transport sse --port 8790
+  and point agents at http://127.0.0.1:8790/sse
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.devbook.service-manager</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/uv</string>
+        <string>run</string>
+        <string>__SERVER_PATH__</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- Keep alive = false by default (stdio servers are launched per-session by agents).
+         Set to true if you switch to SSE/HTTP transport. -->
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/devbook-service-manager.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/devbook-service-manager.err.log</string>
+</dict>
+</plist>

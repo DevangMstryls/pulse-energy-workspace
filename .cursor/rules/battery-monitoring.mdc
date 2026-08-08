@@ -1,0 +1,57 @@
+---
+description: Alert the user when battery percentage drops below 30%
+alwaysApply: true
+---
+
+# Battery Monitoring (Low Battery Alert)
+
+A `devbook-service-manager` MCP server exposes a `system_overview` tool that returns `battery.percent` and `battery.state`. Use it to alert the user when battery is low.
+
+## Threshold
+
+**30%** — trigger the alert whenever `battery.percent < 30`.
+
+## Mid-Session Check
+
+At the start of every agent turn, call `system_overview` once.
+
+- If `battery.percent < 30` AND `battery.state` is NOT `charging`, immediately print a visible alert block (see Format below) at the **top of the response**, BEFORE doing anything else.
+- Do not repeat the alert within the same turn — one alert per turn is enough.
+
+## End-of-Session Check
+
+At the END of every task that produced a meaningful change (i.e., every turn that also requires a Work Completion Summary), call `system_overview` again.
+
+- If `battery.percent < 30` AND `battery.state` is NOT `charging`, render the alert block immediately **AFTER the Work Summary table** and BEFORE any "next steps" list.
+
+## Charging Override
+
+If `battery.state` is `charging`, **skip the alert** — the machine is plugged in and not at risk. Still call `system_overview` so the percent is known, but do not print the alert block.
+
+## Format
+
+```
+### ⚠️ Low Battery
+
+| Metric | Value |
+| ------ | ----- |
+| Battery percent | NN% |
+| Battery state   | discharging |
+```
+
+## Failure Handling
+
+- If `system_overview` is unavailable or errors, silently skip — never block work on a tooling failure.
+- This rule applies only when the `devbook-service-manager` MCP server is available in the session.
+
+## Example
+
+`system_overview` returns `{"battery":{"percent":22,"state":"discharging"}}`:
+
+1. At the start of the turn, print the alert block at the top of the response.
+2. At the end of the turn (if a Work Summary is produced), print the alert block again after the Work Summary table.
+
+`system_overview` returns `{"battery":{"percent":15,"state":"charging"}}`:
+
+1. Call `system_overview` at the start and end of the turn as usual.
+2. Do NOT print the alert block — the machine is charging.

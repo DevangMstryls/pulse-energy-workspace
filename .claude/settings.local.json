@@ -61,7 +61,8 @@
       "mcp__plugin_github_github__pull_request_read",
       "Bash(./node_modules/typescript/bin/tsc --build tsconfig.json)",
       "mcp__plugin_github_github__get_file_contents",
-      "Bash(bash scripts/validate-required-inputs.sh staging)"
+      "Bash(bash scripts/validate-required-inputs.sh staging)",
+      "Bash(mkdir -p /private/tmp/claude-501/-Users-devangmstryls-desk-projects-pulse/4c626a75-7de2-465d-af13-237082bf668c/scratchpad/site && cd /private/tmp/claude-501/-Users-devangmstryls-desk-projects-pulse/4c626a75-7de2-465d-af13-237082bf668c/scratchpad/site && curl -sL --max-time 60 -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\) AppleWebKit/537.36\" https://pulseenergy.io/ -o home.html && wc -c home.html)"
     ]
   }
 }
