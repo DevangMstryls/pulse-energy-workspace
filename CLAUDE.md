@@ -197,7 +197,7 @@ Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g.
 - Always return numbered lists (`1.`, `2.`, `3.`) instead of bullet lists (`-`, `*`) in responses to the user.
 - This applies to all enumerations in chat output: steps, options, findings, summaries, sub-items, etc.
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
-- Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<relative-path>](<relative-path>)` with paths relative to the workspace/repo root. Verify the path exists before linking. Example: `[src/server.ts](src/server.ts)`, not bare `src/server.ts`. For paths outside the current repo, use absolute paths like `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`.
+- Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<path>](<path>)` and always provide the **full absolute path** of any local file (e.g., `/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts`). Verify the path exists before linking. Example: `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`, not bare `src/server.ts` or a relative path.
 
 ## Command Output Reporting
 
