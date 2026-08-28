@@ -4,8 +4,29 @@
         {
             "name": "pulse-energy-web-new",
             "runtimeExecutable": "python3",
-            "runtimeArgs": ["-m", "http.server", "4173", "--directory", "pulse-energy-web-new"],
+            "runtimeArgs": [
+                "-m",
+                "http.server",
+                "4173",
+                "--directory",
+                "pulse-energy-web-new"
+            ],
             "port": 4173
+        },
+        {
+            "name": "central-console",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": [
+                "env-cmd",
+                "-f",
+                ".dev.env",
+                "vite",
+                "--port",
+                "3001",
+                "--strictPort"
+            ],
+            "cwd": "central-console",
+            "port": 3001
         }
     ]
 }
