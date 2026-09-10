@@ -18,6 +18,9 @@
 		},
 		{
 			"path": "pulse-skills"
+		},
+		{
+			"path": "../personal/devang-agentic-tools"
 		}
 	]
 }

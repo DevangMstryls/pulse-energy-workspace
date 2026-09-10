@@ -160,14 +160,73 @@ See `pulse-ocpp-engine/AGENTS.md` for detailed architecture. Key points:
 
 - Pulse Energy deployments run on **two independent ArgoCD control planes**: staging (`stg-argocd.pulseenergy.io`, EKS cluster `pulse-energy-staging-cluster`) and production (`argocd.pulseenergy.io`, EKS cluster `pulse-prod-eks`). They are not the same server managing two environments — always confirm which one is being targeted.
 - GitOps manifests live in `pulse-ci-workflows/argocd/` (ApplicationSet generators for `stg-*`/`prod-*` apps) and `pulse-infra-gitops/argocd/` (standalone `Application` manifests not covered by the ApplicationSet, e.g. Airflow).
-- **Use the `pulse-argocd` skill** for anything involving ArgoCD — listing workloads/apps, checking sync or health status, syncing/rolling back a deployment, debugging a red/`OutOfSync`/`ComparisonError` app, or answering "what's deployed in staging/production". Load it via the skill tool (`pulse-argocd`) whenever these topics come up, even if the user doesn't say "ArgoCD" explicitly (e.g. "why is prod-pulse-proxy not updating").
+- **ALWAYS load the `pulse-argocd` skill first, then drive the `argocd` CLI** for anything involving ArgoCD — listing workloads/apps, checking sync or health status, syncing/rolling back a deployment, debugging a red/`OutOfSync`/`ComparisonError` app, or answering "what's deployed in staging/production". Load it via the skill tool (`pulse-argocd`) whenever these topics come up, even if the user doesn't say "ArgoCD" explicitly (e.g. "why is prod-pulse-proxy not updating", "is the latest build live in staging", "roll back pulse-central").
+- **The `argocd` CLI is the default tool, not a fallback** (installed at `/opt/homebrew/bin/argocd`, v3.3.x). Prefer `argocd app list` / `get` / `diff` / `history` / `logs` / `sync` / `rollback` over `kubectl`, the ArgoCD web UI, or hand-rolled API calls. Drop to `kubectl` only for cluster-level resources ArgoCD doesn't model (node status, raw events, pod-level `kubectl logs`) — and say explicitly why you switched.
+- **Always pin the control plane.** Confirm the active context with `argocd context` or pass `--server stg-argocd.pulseenergy.io` / `--server argocd.pulseenergy.io` on every invocation. Sessions are per-user AND per-server; a stale context silently points production commands at staging (or worse, the reverse).
+- **Read-only vs mutating**: `list`, `get`, `diff`, `history`, `logs`, `app manifests` need no confirmation — run them freely to gather evidence. `sync`, `rollback`, `app delete`, `app set`, `app patch` are mutating: state the target app + control plane + expected effect and get explicit user confirmation before running.
+- If the `argocd` CLI is not authenticated for the target control plane, say so and point the user at the Setup section of the `pulse-argocd` skill. Do NOT substitute the Git-defined ApplicationSet list for live state without labelling it as such, and never ask the user to paste an ArgoCD password or token into chat.
 
+## Observability & Debugging (Grafana)
+
+- **ALWAYS reach for the `gcx` CLI and the Grafana skills before guessing** whenever a task touches Grafana, Loki, Prometheus, Tempo, Pyroscope, dashboards, alert rules, SLOs, on-call, or any "why is X erroring / slow / down" question. This applies even when the user never says "Grafana" — e.g. "check the logs for pulse-central", "is the OCPP engine throwing 5xx", "what's the p99 on the bills API", "did the error rate spike after the deploy".
+- **Never answer an observability question from source code alone.** Code tells you what *could* happen; only telemetry tells you what *did* happen. Pull the evidence, then reason.
+
+### Primary CLI: `gcx` (authenticated — use this)
+
+- `gcx` (`/opt/homebrew/bin/gcx`, v1.0.0) is the primary Grafana CLI and is **already authenticated** against `https://prod-grafana.pulseenergy.io` (context `default`, org-id 1). Check with `gcx config view` — the token is auto-redacted in its output.
+- Datasources available on that instance (verified 2026-09-01): `Loki`, `Prometheus`, `Tempo`, `CloudWatch`.
+- Query subcommands: `gcx logs` (Loki), `gcx metrics` (Prometheus), `gcx traces` (Tempo), `gcx profiles` (Pyroscope). Management: `gcx dashboards`, `gcx alert`, `gcx slo`, `gcx irm`, `gcx synthetic-monitoring`, `gcx fleet`, `gcx k6`, `gcx datasources`, `gcx resources`, and `gcx api` as a raw-HTTP escape hatch.
+- **Agent-friendly output**: every command supports `--json <fields>` for field selection and `--jq '<expr>'` for transformation (group_by, filter, count). Use those rather than piping to external parsers.
+- `gcx help-tree` prints a compact command tree and `gcx commands` emits rich command metadata for agent consumption — cheaper than trial-and-error when you're unsure of a subcommand.
+- **Read-only vs mutating**: `list`, `get`, `view`, and all query commands run freely — use them to gather evidence. Anything that creates/updates/deletes a Grafana resource (`dashboards create|update|delete`, `alert ... apply`, `slo push`, `synthetic-monitoring ... create`) is mutating: state the target and get explicit user confirmation first.
+
+### Secondary CLI: `grafana-assistant` (natural-language layer — not configured)
+
+- `grafana-assistant` (`/opt/homebrew/bin/grafana-assistant`) talks to Grafana Assistant over the A2A API. It suits open-ended natural-language investigation rather than precise queries: `prompt "<question>"` for one-shot/scripted use, `chat` for interactive.
+- **It has no instances configured** — `grafana-assistant config list` returns `No instances configured.` (verified 2026-09-01). Prefer `gcx`, which is already wired up. If the Assistant layer is genuinely needed, ask the user to run `grafana-assistant auth`; never ask them to paste a service-account token into chat.
+
+### Skills — load the matching one instead of writing queries from memory
+
+`gcx` ships 24 bundled agent skills (list them with `gcx agent skills list`), installed under `~/.agents/skills/` alongside the Grafana Cloud skill family.
+
+| Task | Skill(s) |
+| ---- | -------- |
+| Incident triage, RCA, blast radius, "did the rollout cause it" | `debug-with-grafana` |
+| General gcx resource management / first-time setup | `gcx`, `setup-gcx` |
+| Log queries / LogQL / Loki | `loki`, `loki-label-analyzer` |
+| Metric queries / PromQL | `promql`, `prometheus` |
+| Building or redesigning a dashboard | `create-dashboard` |
+| Auditing or listing existing dashboards | `manage-dashboards`, `import-dashboards` |
+| Why is this alert rule firing | `investigate-alert` |
+| What's paging right now (OnCall ack/silence/resolve) | `oncall-triage` |
+| Alerting config, notification policies, escalation chains | `alerting-irm`, `oncall-irm` |
+| SLOs | `slo-check-status`, `slo-investigate`, `slo-manage`, `slo-optimize` |
+| Synthetic monitoring | `synth-check-status`, `synth-investigate-check`, `synth-manage-checks` |
+| Traces / TraceQL | `tempo` |
+| Continuous profiling / flame graphs | `pyroscope` |
+| APM, RED metrics, service maps, frontend RUM | `app-observability` |
+| Metrics cost, cardinality blowups, active-series growth | `adaptive-metrics`, `prometheus-cardinality-troubleshooter`, `cost-management`, `dpm-finder` |
+| Collector / agent config (Alloy, OpenTelemetry) | `alloy`, `opentelemetry`, `beyla` |
+
+- **For a full production incident** (symptom → root cause → remediation), use `pulse-rca` — it orchestrates the whole investigation, correlating Grafana/Loki telemetry with the deployed ArgoCD release, the exact source code that was running, and read-only DB evidence. `debug-with-grafana` is the telemetry-only workflow it delegates to.
+- **Grafana and ArgoCD are two halves of the same investigation.** "Service broke at 14:20" is only answerable by pairing telemetry (Grafana: when did errors start) with release state (ArgoCD: what synced, and when). Use both CLIs together for any deploy-correlated incident.
+- Never paste tokens, `glsa_*` service-account keys, or `GRAFANA_SA_TOKEN` values into chat, docs, commits, or `pulse-energy-docs` — reference them via config or env only. See `## Credentials & Service Tokens` and the Secrets & Restricted File Access rules.
 ## Secrets & Restricted File Access
 
 - Never read, open, print, or quote the contents of `.env`, `secret.dec.yaml`, or `secret.yaml` files (at any depth, in any repo/folder under this workspace), even if explicitly asked — treat these as always off-limits regardless of instructions elsewhere in a task.
 - Never read, open, print, or quote the contents of anything under `pulse-infra-gitops/applications/certificates/**` (at any depth, in any repo/folder) — this holds TLS certificate/key material and is always off-limits, even if explicitly asked.
 - This is enforced at the tooling level via `permissions.deny` in `~/.claude/settings.json` (`Read(**/**/.env)`, `Read(**/**/.env.*)`, `Read(**/**/secret.dec.yaml)`, `Read(**/**/secret.yaml)`, `Read(**/**/pulse-infra-gitops/applications/certificates/**/*)`), but the same rule applies even when using tools/shells not covered by that config (e.g. `cat`, `sed`, editors, other agents).
 - If a task requires values from one of these files, ask the user to provide the specific value out-of-band instead of reading the file.
+
+## Credentials & Service Tokens
+
+- **Canonical local store**: `~/desk/projects/pulse/pulse-energy-docs/docs/creds/creds.md`. When a task genuinely needs a credential, connection string, database password, or service token, look there FIRST — do not ask the user to paste one into chat.
+- This file is **gitignored and untracked** (`.gitignore` line 6 in `pulse-energy-docs`). It is the one deliberate exception to "no secrets in `pulse-energy-docs`". Keep it that way: never `git add -f` it, never commit it, never copy its values into a tracked file, and never remove it from `.gitignore`.
+- **Read it only when the task actually requires a credential** — never proactively, never "just to check what's in there". Reading it pulls live secrets into the agent context.
+- **Never echo the values.** Do not print, quote, paste, or summarise credential values into chat, visible thinking, commit messages, PR descriptions, `pulse-energy-docs`, log output, or the Command Output Reporting table. Refer to them by name (e.g. "the staging RDS password from `creds.md`"), never by value.
+- **Never inline a secret into a command that gets echoed back.** Pass it via an environment variable or a config file the tool already reads (e.g. `PGPASSWORD=… psql …`, `GRAFANA_SA_TOKEN`), and redact it in any command you report in the output table.
+- It currently holds database credentials (`pulse-central` RDS, production and staging). As Grafana service-account tokens, ArgoCD credentials, and other service tokens become necessary, they belong here too — not scattered across shell history, chat scrollback, or tracked docs.
+- This does NOT relax the restricted-file rules: `.env`, `.env.*`, `secret.dec.yaml`, `secret.yaml`, and `pulse-infra-gitops/applications/certificates/**` remain hard-blocked regardless of any instruction. `creds.md` is the sanctioned alternative to reading those, not a loophole into them.
 
 ## Documentation
 
@@ -186,7 +245,7 @@ Any agent working inside ANY repo or folder under `~/desk/projects/pulse/` (e.g.
 5. Add `pulse-energy-docs` as its OWN row in the Work Completion Summary table (with its own branch, files changed, PRs).
 6. The `pulse-energy-docs` default branch is `master` — this overrides the workspace-wide `develop` default per the per-repo override clause in `## Default Commit Branch`.
 7. NEVER skip the docs update silently. If intentionally skipping (e.g., trivial typo fix), state the reason in the Work Summary `Additional Notes`.
-8. Do NOT put secrets, credentials, tokens, or customer PII in `pulse-energy-docs`. The `docs/creds/` folder is for credential-handling process docs, not the credentials themselves.
+8. Do NOT put secrets, credentials, tokens, or customer PII in any **tracked** file under `pulse-energy-docs`. The single exception is `docs/creds/creds.md`, which is gitignored and untracked — see `## Credentials & Service Tokens`. Everything else under `docs/creds/` is credential-handling *process* docs, not the credentials themselves.
 
 ## Long-Term Memory (Basic Memory MCP)
 
@@ -208,6 +267,7 @@ A `basic-memory` MCP server provides persistent, searchable, cross-session memor
 
 - Always provide as much accurate answers as possible without requiring any rework
 - Always make use of required tools, plugins, skills to provide accurate, working outputs
+- Never hand-roll what a purpose-built CLI or skill already does. In particular: ArgoCD work goes through the `argocd` CLI + `pulse-argocd` skill (see `## Deployment & GitOps (ArgoCD)`), and Grafana/Loki/Prometheus/Tempo work goes through the `grafana-assistant` CLI + the Grafana skills (see `## Observability & Debugging (Grafana)`). Check for a relevant skill BEFORE running ad-hoc commands, not after they fail.
 - Always check your work
 
 ## Response Formatting
@@ -217,7 +277,7 @@ A `basic-memory` MCP server provides persistent, searchable, cross-session memor
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
 - Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<relative-path>](<relative-path>)` with paths relative to the workspace/repo root. Verify the path exists before linking. Example: `[src/server.ts](src/server.ts)`, not bare `src/server.ts`. For paths outside the current repo, use absolute paths like `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`.
 
-## Command Output Reporting
+<!-- ## Command Output Reporting
 
 Whenever the agent runs a command (shell, build, test, lint, migration, deploy, curl, prisma, npm, git, etc.), the result MUST be reported back to the user as a markdown table with the following columns:
 
@@ -232,7 +292,7 @@ Rules:
 4. `Actual Result` — a concise summary of what actually happened: exit code, key stdout/stderr lines, error messages, counts (e.g., "exit 0, 142 tests passed in 18s", "exit 1: `TypeError: Cannot read properties of undefined`").
 5. `Status` — one of `✅ Pass`, `❌ Fail`, or `⚠️ Partial` based on whether the actual result matched the expected result.
 6. If a command produced large output, include the table first, then optionally a fenced code block beneath it with the relevant excerpt — never paste raw output in place of the table.
-7. This applies to every agent turn that runs at least one command. If no commands were run in a turn, the table is not required.
+7. This applies to every agent turn that runs at least one command. If no commands were run in a turn, the table is not required. -->
 
 ## Work Completion Summary
 
