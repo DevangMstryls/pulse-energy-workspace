@@ -23,8 +23,6 @@ ev-bootcamp-kit-v1.zip
 FleetApp
 # --- Auto-detected git repositories ---
 DEG-p2p-trading/
-EzetapTest/
-EzetapTest3/
 Fleet-App/
 Fleety/
 InstaCharge/
@@ -46,13 +44,12 @@ columbus/
 cp-farm/
 cs-sim-manager/
 cs-simulator/
+dataverse-dashboard/
 devops-dashboard/
-e-mobility-charging-stations-simulator/
 energy-market/
 ev-bootcamp-kit/
 fleet-lite/
 kiyte/
-mobile-evre/
 opensre/
 ops-dashboard-backend/
 pai-backend/
@@ -64,9 +61,6 @@ pulse-api/
 pulse-artifacts/
 pulse-central/
 pulse-central-alpha/
-pulse-central-new-rest/
-pulse-central-ocpp/
-pulse-central-rest/
 pulse-central-ws-api/
 pulse-ci-workflows/
 pulse-dataverse/
@@ -75,6 +69,7 @@ pulse-energy-helm/
 pulse-energy-lite/
 pulse-energy-web-new/
 pulse-evcharging-beckn-provider/
+pulse-green-market/
 pulse-http-server-template/
 pulse-iaac/
 pulse-infra-gitops/
@@ -100,6 +95,3 @@ ubc-ocpi-adaptor/
 ubc-specs/DEG/
 ubc-specs/protocol-specifications-new/
 ubc/ubc-ev-sandbox-otel/
-cert/star_pulseenergy_io.csr
-cert/star_pulseenergy_io.key
-allianz-policies/

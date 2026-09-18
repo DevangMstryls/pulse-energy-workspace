@@ -174,6 +174,7 @@ See `pulse-ocpp-engine/AGENTS.md` for detailed architecture. Key points:
 ### Primary CLI: `gcx` (authenticated — use this)
 
 - `gcx` (`/opt/homebrew/bin/gcx`, v1.0.0) is the primary Grafana CLI and is **already authenticated** against `https://prod-grafana.pulseenergy.io` (context `default`, org-id 1). Check with `gcx config view` — the token is auto-redacted in its output.
+- **Always pin the gcx context.** Two contexts exist: `default` → `https://prod-grafana.pulseenergy.io` and `staging` → `https://stg-grafana.pulseenergy.io`. `current-context` is `staging` as of 2026-09-18, so a bare `gcx …` queries **staging**. Pass `--context default` (prod) or `--context staging` explicitly, placing the flag before the subcommand (e.g. `gcx --context default metrics query …`).
 - Datasources available on that instance (verified 2026-09-01): `Loki`, `Prometheus`, `Tempo`, `CloudWatch`.
 - Query subcommands: `gcx logs` (Loki), `gcx metrics` (Prometheus), `gcx traces` (Tempo), `gcx profiles` (Pyroscope). Management: `gcx dashboards`, `gcx alert`, `gcx slo`, `gcx irm`, `gcx synthetic-monitoring`, `gcx fleet`, `gcx k6`, `gcx datasources`, `gcx resources`, and `gcx api` as a raw-HTTP escape hatch.
 - **Agent-friendly output**: every command supports `--json <fields>` for field selection and `--jq '<expr>'` for transformation (group_by, filter, count). Use those rather than piping to external parsers.
@@ -267,11 +268,12 @@ A `basic-memory` MCP server provides persistent, searchable, cross-session memor
 
 - Always provide as much accurate answers as possible without requiring any rework
 - Always make use of required tools, plugins, skills to provide accurate, working outputs
-- Never hand-roll what a purpose-built CLI or skill already does. In particular: ArgoCD work goes through the `argocd` CLI + `pulse-argocd` skill (see `## Deployment & GitOps (ArgoCD)`), and Grafana/Loki/Prometheus/Tempo work goes through the `grafana-assistant` CLI + the Grafana skills (see `## Observability & Debugging (Grafana)`). Check for a relevant skill BEFORE running ad-hoc commands, not after they fail.
+- Never hand-roll what a purpose-built CLI or skill already does. In particular: ArgoCD work goes through the `argocd` CLI + `pulse-argocd` skill (see `## Deployment & GitOps (ArgoCD)`), and Grafana/Loki/Prometheus/Tempo work goes through the `gcx` CLI + the Grafana skills (see `## Observability & Debugging (Grafana)`). Check for a relevant skill BEFORE running ad-hoc commands, not after they fail.
 - Always check your work
 
 ## Response Formatting
 
+- **Be clear and concise.** Skip verbosity (no filler, preamble, or restating the question), but never drop details that matter: exact commands, paths, values, caveats, and failures. If cutting words would cost clarity, keep the words.
 - Always return numbered lists (`1.`, `2.`, `3.`) instead of bullet lists (`-`, `*`) in responses to the user.
 - This applies to all enumerations in chat output: steps, options, findings, summaries, sub-items, etc.
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
