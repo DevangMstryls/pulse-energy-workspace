@@ -13,4 +13,7 @@ ubc-beckn-onix
 ubc-demo
 ev-bootcamp-kit-v1.zip
 .playwright-mcp
-FleetApp
+FleetApp# TLS certificate/key material and Allianz policy docs (restored 2026-09-18; the regen script had dropped them)
+cert/star_pulseenergy_io.csr
+cert/star_pulseenergy_io.key
+allianz-policies/
