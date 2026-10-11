@@ -27,6 +27,25 @@
             ],
             "cwd": "central-console",
             "port": 3001
+        },
+        {
+            "name": "central-console-preprod",
+            "runtimeExecutable": "env",
+            "runtimeArgs": [
+                "REACT_APP_API_ENDPOINT=https://preprod-central-api.pulseenergy.io/api/console",
+                "REACT_APP_V4_API_ENDPOINT=https://preprod-central-api.pulseenergy.io/api/console/v4",
+                "npx",
+                "env-cmd",
+                "--no-override",
+                "-f",
+                ".dev.env",
+                "vite",
+                "--port",
+                "3000",
+                "--strictPort"
+            ],
+            "cwd": "central-console",
+            "port": 3000
         }
     ]
 }
