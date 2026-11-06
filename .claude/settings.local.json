@@ -67,7 +67,32 @@
       "Bash(kubectl --context arn:aws:eks:ap-south-1:366292523926:cluster/pulse-prod-eks-otel cordon ip-10-40-63-183.ap-south-1.compute.internal)",
       "Bash(kubectl --context arn:aws:eks:ap-south-1:366292523926:cluster/pulse-prod-eks-otel label node ip-10-40-63-183.ap-south-1.compute.internal node.kubernetes.io/exclude-from-external-load-balancers=true)",
       "Bash(kubectl --context arn:aws:eks:ap-south-1:366292523926:cluster/pulse-prod-eks-otel drain ip-10-40-63-183.ap-south-1.compute.internal --ignore-daemonsets --delete-emptydir-data --timeout=120s)",
-      "Bash(aws autoscaling terminate-instance-in-auto-scaling-group --region ap-south-1 --instance-id i-0bae06b4acbe080ed --should-decrement-desired-capacity)"
+      "Bash(aws autoscaling terminate-instance-in-auto-scaling-group --region ap-south-1 --instance-id i-0bae06b4acbe080ed --should-decrement-desired-capacity)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(cut:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(tee:*)",
+      "Bash(od:*)",
+      "Bash(printf:*)",
+      "Bash(sed -n:*)",
+      "Bash(python3 -I:*)",
+      "Bash(test:*)",
+      "Bash(export PATH=/opt/homebrew/bin:$PATH:*)",
+      "Bash(kubectl --context arn:aws:eks:ap-south-1:366292523926:cluster/pulse-prod-eks -n clickhouse exec -i chi-analytics-main-0-0-0 -c clickhouse -- clickhouse-client:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(git show:*)",
+      "Bash(git checkout:*)",
+      "Bash(git worktree add:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git -C:*)",
+      "Bash(gcloud auth application-default print-access-token:*)",
+      "Bash(gcloud auth print-access-token:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(done)"
     ]
   }
 }

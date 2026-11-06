@@ -44,6 +44,7 @@ beckn/beckn-onix/
 beckn/beckn-transformer/
 bpp-client-server/
 bpp-network-server/
+car-3d/tools/TripoSR/
 central-console/
 columbus/
 cp-farm/
@@ -101,3 +102,4 @@ ubc-ocpi-adaptor/
 ubc-specs/DEG/
 ubc-specs/protocol-specifications-new/
 ubc/ubc-ev-sandbox-otel/
+whatsapp-support/

@@ -219,6 +219,26 @@ See `pulse-ocpp-engine/AGENTS.md` for detailed architecture. Key points:
 - This is enforced at the tooling level via `permissions.deny` in `~/.claude/settings.json` (`Read(**/**/.env)`, `Read(**/**/.env.*)`, `Read(**/**/secret.dec.yaml)`, `Read(**/**/secret.yaml)`, `Read(**/**/pulse-infra-gitops/applications/certificates/**/*)`), but the same rule applies even when using tools/shells not covered by that config (e.g. `cat`, `sed`, editors, other agents).
 - If a task requires values from one of these files, ask the user to provide the specific value out-of-band instead of reading the file.
 
+
+## Compliance & Security Documents
+
+Pulse Energy's drafted and approved compliance documents (policies, plans, assessments shared with customers) live **outside any git repo** in `/Users/devangmstryls/desk/data/pulse/documents/compliance/`. Check there FIRST whenever a customer security questionnaire, TPRM/vendor-risk assessment, audit or CERT-In request needs a policy or evidence document, and save any new or revised compliance document there (Word `.docx`, versioned file names `Pulse-Energy-<Name>-vX.Y.docx`).
+
+| File | What it is |
+| ---- | ---------- |
+| `Pulse-Energy-Incident-Response-Plan-v1.1.docx` | Current IR plan: severity, escalation (Principal Engineer, CTO, CEO), containment, forensic evidence handling, recovery, CERT-In reporting, post-incident review |
+| `Pulse-Energy-Incident-Response-Plan-v1.0.docx` | Superseded by v1.1 (no forensic step); keep for history only |
+| `Pulse-Energy-Disaster-Recovery-Plan-v1.0.docx` | DR plan for the AWS platform: RTO/RPO per service, runbooks (ArgoCD redeploy, RDS PITR, region loss) |
+| `Pulse-Energy-Patch-and-Vulnerability-Management-Policy-v1.0.docx` | Patch policy: Critical 7 days internet-facing (72 h if exploited), staging-first rollout, quarterly review |
+| `Pulse-Energy-Removable-Media-Policy-v1.0.docx` | Removable media prohibited by default, MDM USB block, disposal, reviews |
+| `Pulse-Energy-Supplier-Security-Assessment-AI-Providers-v1.0.docx` | Supplier assessment of OpenAI and Google Maps Platform for the AI charging assistant |
+
+Rules:
+
+1. All six are approved by the CEO (Akhil Jayaprakash, 03-11-2026). Version dates are 15 June 2026 at Devang's request; titles are "CEO" and "CTO" only; no sign-off/approval tables.
+2. The company's original policy PDFs (Information Security, BC/DR, HR, Physical Security, Risk Management, Supplier Management) and the ISO 27001 certificate are in `allianz-policies/` at the workspace root. The IS and Physical Security PDFs still contain unfilled `{{Organization_Name_for_Policies}}` placeholders: do not send them to customers as-is.
+3. The Allianz Partners TPCRM 2026 history (answers, flagged gaps, portal comments and dated remediation commitments) is in `pulse-energy-docs/docs/audits/2026-09-08-allianz-partners-tpcrm-2026-questionnaire-flags.md` and `pulse-energy-docs/docs/audits/2026-10-27-allianz-tpcrm-critical-risks-responses.md`. Never claim a control in a customer response that those docs record as a gap unless it has since been fixed and verified.
+
 ## Credentials & Service Tokens
 
 - **Canonical local store**: `~/desk/projects/pulse/pulse-energy-docs/docs/creds/creds.md`. When a task genuinely needs a credential, connection string, database password, or service token, look there FIRST — do not ask the user to paste one into chat.

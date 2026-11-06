@@ -46,6 +46,25 @@
             ],
             "cwd": "central-console",
             "port": 3000
+        },
+        {
+            "name": "pulse-dataverse-eval",
+            "runtimeExecutable": "sh",
+            "runtimeArgs": [
+                "-c",
+                "cd \"/private/tmp/claude-501/-Users-devangmstryls-desk-projects-pulse/74555710-9a52-4282-a86c-88ccd44e5357/scratchpad/wt-dataverse-eval\" && TS_NODE_TRANSPILE_ONLY=true npx nodemon"
+            ],
+            "port": 9500
+        },
+        {
+            "name": "pulse-dataverse",
+            "runtimeExecutable": "sh",
+            "runtimeArgs": [
+                "-c",
+                "TS_NODE_TRANSPILE_ONLY=true npx nodemon"
+            ],
+            "cwd": "pulse-dataverse",
+            "port": 9000
         }
     ]
 }
