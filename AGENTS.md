@@ -341,6 +341,11 @@ Rules:
 7. Add any other relevant columns after these six (e.g. Owner, Repo, Due, PR, ETA, Risk).
 8. **Verification and observation notes go BELOW the table, never inside it.** After a task is done or attempted, add an entry under a `### Verification & observations` heading below the table, keyed by `Task id` and timestamp (e.g. `**T2** (2026-11-20 14:05 IST): backfilled 1.2M rows; spot-checked 20 ids, all match.`). Include evidence: commands, query results, PR or commit links, and what failed.
 
+## Usage & Cost Reporting
+
+1. Be mindful of token usage: read only the file ranges you need, avoid re-reading files, batch independent tool calls, keep outputs short, and spawn subagents or workflows only when they clearly pay for themselves.
+2. At the end of every turn, add a `### Usage` block reporting the tokens and estimated cost incurred, using the best available source (`mcp__ccd_session_mgmt__get_usage` for context tokens and plan-limit %, `/cost` output if provided). If an exact per-turn figure is unavailable, say so and give the closest available numbers (context tokens used, plan % used) rather than inventing a cost.
+
 ## Work Completion Summary
 
 At the end of every task that produced a meaningful change (code edits, commits, PRs, infra changes, schema updates, deploys, etc.), the agent MUST provide a final Work Summary as a markdown table:
