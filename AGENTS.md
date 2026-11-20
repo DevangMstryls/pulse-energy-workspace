@@ -297,7 +297,11 @@ A `basic-memory` MCP server provides persistent, searchable, cross-session memor
 - Always return numbered lists (`1.`, `2.`, `3.`) instead of bullet lists (`-`, `*`) in responses to the user.
 - This applies to all enumerations in chat output: steps, options, findings, summaries, sub-items, etc.
 - This rule governs assistant chat formatting only — do NOT rewrite existing bullet content inside source files, docs, or rule files unless explicitly asked.
-- Always return file paths as clickable markdown links that resolve correctly to the file. Use the format `[<relative-path>](<relative-path>)` with paths relative to the workspace/repo root. Verify the path exists before linking. Example: `[src/server.ts](src/server.ts)`, not bare `src/server.ts`. For paths outside the current repo, use absolute paths like `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`.
+- **Always use the full absolute path for every local file or directory you mention. Never use a relative path.** This applies everywhere you name a path: chat replies, lists, tables (including the Work Completion Summary and Command Output Reporting tables), recaps, plans, review findings, and handoff notes. Write the path as a clickable markdown link in the form `[<absolute-path>](<absolute-path>)`, and verify that it exists before you link it.
+  - Do: `[/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts](/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts)`
+  - Don't: `src/server.ts`, `./src/server.ts`, `pulse-central/src/server.ts`, `[server.ts](src/server.ts)`, or `~/desk/...`
+  - Line references keep the absolute path: `/Users/devangmstryls/desk/projects/pulse/pulse-central/src/server.ts:42`.
+  - Exception: paths written *inside* source files, configs, scripts, and committed docs follow that file's own conventions, which are usually repo-relative.
 
 <!-- ## Command Output Reporting
 
@@ -315,6 +319,27 @@ Rules:
 5. `Status` — one of `✅ Pass`, `❌ Fail`, or `⚠️ Partial` based on whether the actual result matched the expected result.
 6. If a command produced large output, include the table first, then optionally a fenced code block beneath it with the relevant excerpt — never paste raw output in place of the table.
 7. This applies to every agent turn that runs at least one command. If no commands were run in a turn, the table is not required. -->
+
+## Implementation Plan / Plan Doc Task Table
+
+Every implementation plan or plan doc (in chat, in `pulse-energy-docs`, or in any repo `docs/` folder) MUST include a task list as a markdown table. These columns are mandatory and must appear in this order:
+
+| # | Task id | Status | Task | Depends on | Blocked | ...other relevant columns |
+| - | ------- | ------ | ---- | ---------- | ------- | ------------------------- |
+| 1 | T1 | ✅ Done | Add `foo` column migration | — | No | ... |
+| 2 | T2 | ⏳ In Progress | Backfill `foo` | T1 | No | ... |
+| 3 | T3 | ❌ Blocked | Switch reads to `foo` | T2 | Yes: waiting on prod window | ... |
+
+Rules:
+
+1. `#` is the running serial number (1, 2, 3, ...).
+2. `Task id` is a stable short id (e.g. `T1`, `A33`, `P4`). It never changes once assigned, even if rows are reordered, so other rows and docs can reference it.
+3. `Status` starts with an emoji: `✅ Done`, `⏳ In Progress`, `🔲 Pending`, `❌ Blocked` or `❌ Failed`, `🟡 Needs attention`, `🚫 Skipped`.
+4. `Task` is the clean task description. Never edit status, timestamps, or results into this text.
+5. `Depends on` lists `Task id`s, comma-separated, or `—` if none.
+6. `Blocked` is `No`, or `Yes:` followed by the blocker.
+7. Add any other relevant columns after these six (e.g. Owner, Repo, Due, PR, ETA, Risk).
+8. **Verification and observation notes go BELOW the table, never inside it.** After a task is done or attempted, add an entry under a `### Verification & observations` heading below the table, keyed by `Task id` and timestamp (e.g. `**T2** (2026-11-20 14:05 IST): backfilled 1.2M rows; spot-checked 20 ids, all match.`). Include evidence: commands, query results, PR or commit links, and what failed.
 
 ## Work Completion Summary
 

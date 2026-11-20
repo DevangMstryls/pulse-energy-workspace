@@ -44,7 +44,6 @@ beckn/beckn-onix/
 beckn/beckn-transformer/
 bpp-client-server/
 bpp-network-server/
-car-3d/tools/TripoSR/
 central-console/
 columbus/
 cp-farm/
@@ -56,7 +55,6 @@ energy-market/
 ev-bootcamp-kit/
 fleet-lite/
 kiyte/
-opensre/
 ops-dashboard-backend/
 pai-backend/
 pghero-helmchart/
