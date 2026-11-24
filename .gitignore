@@ -28,11 +28,11 @@ allianz-policies/
 
 # --- Auto-detected git repositories ---
 DEG-p2p-trading/
-Fleet-App/
 Fleety/
 InstaCharge/
 InstaChargePWA/
 Pulse/
+SUPEREV/
 ThunderPlus/
 airflow/
 airflow-dags/
